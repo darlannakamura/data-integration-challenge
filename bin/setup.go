@@ -4,21 +4,25 @@ import (
 	"os"
 	"fmt"
 	"strings"
-	utils "./utils"
-	db "./db"
+	utils "../utils"
+	db "../db"
 	"github.com/akamensky/argparse"
 )
 
 func main() {
+	fmt.Println("Running setup ...")
+
 	parser := argparse.NewParser("parser", "")
 
 	filename := parser.String("f", "file", &argparse.Options{Required: true, Help: "Insert the CSV file path"})
-
+	
 	err := parser.Parse(os.Args)
 	
 	if err != nil {
 		fmt.Print(parser.Usage(err))
 	}
+
+	fmt.Println("Reading CSV file:", *filename)
 
 	rows, err := utils.ReadCSV(*filename)
 
@@ -26,6 +30,8 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+
+	fmt.Println("Recreating companies table ...")
 
 	db.DropCompanyTable()
 	db.CreateCompanyTable()
@@ -36,9 +42,9 @@ func main() {
 
 		if (utils.ValidateName(name) && utils.ValidateZip(zip)) {
 			name := strings.ToUpper(name)
-
-			fmt.Println(name, " | ", zip)
 			db.InsertCompany(name, zip)
 		}
 	}
+
+	fmt.Println("Your database has been populated successfully.")
 }
