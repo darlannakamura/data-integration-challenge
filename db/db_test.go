@@ -55,3 +55,37 @@ func TestInsertCompany(t *testing.T) {
 		}
 	}
 }
+
+func TestUpdateCompany(t *testing.T) {
+	var name = "random new company"
+	var zip = "12345"
+	var website = "https://random.company.com"
+
+	err := InsertCompany(name, zip)
+
+	if err != nil {
+		t.Errorf("%s('%s','%s') FAILED, got an unexpected error: %s", "InsertCompany", name, zip, err)
+	}
+
+	id, err := GetCompanyIdByNameAndZip(name, zip)
+
+	if err != nil {
+		t.Errorf("%s('%s','%s') FAILED, got an unexpected error: %s", "GetCompanyIdByNameAndZip", name, zip, err)
+	}
+
+	if id == 0 {
+		t.Errorf("%s('%s','%s') FAILED, got 0 in company id", "GetCompanyIdByNameAndZip", name, zip)
+	}
+
+	updateError := UpdateCompanyWebsite(id, website)
+
+	if updateError != nil {
+		t.Errorf("%s('%s','%s') FAILED, got an unexpected error: %s", "UpdateCompanyWebsite", name, zip, updateError)
+	}
+
+	delError := DeleteCompany(name, zip)
+
+	if delError != nil {
+		t.Errorf("%s('%s','%s') FAILED, got an unexpected error: %s", "DeleteCompany", name, zip, delError)
+	}
+}

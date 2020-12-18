@@ -181,3 +181,63 @@ func DeleteCompany(name string, zip string) error {
 
 	return nil
 }
+
+func GetCompanyIdByNameAndZip(name string, zip string) (int, error) {
+	db, err := GetDBConnection()
+
+	if err != nil {
+		return 0, err
+	}
+
+	rows, err := db.Query("SELECT id FROM companies WHERE LOWER(name) LIKE '%' || $1 || '%' AND zip = $2 LIMIT 1", name, zip)
+
+	if err != nil {
+		return 0, err
+	}
+
+	defer rows.Close()
+
+	var id int = 0
+
+	for rows.Next() {
+		err := rows.Scan(&id)
+		if err != nil {
+			return 0, err
+		} else {
+			return id, nil
+		}
+	}
+	
+	return 0, nil
+}
+
+func UpdateCompanyWebsite(id int, website string) error {
+	db, err := GetDBConnection()
+
+	if err != nil {
+		return err
+	}
+
+    update, err := db.Prepare("UPDATE companies SET website=$1 WHERE id=$2")
+	
+	if err != nil {
+		return err
+	}
+
+    result, err := update.Exec(website, id)
+    if err != nil {
+		return err
+	}
+
+	affect, err := result.RowsAffected()
+	
+    if err != nil {
+		return err
+	}
+
+	if affect != 1 {
+		return errors.New(fmt.Sprintf("%d rows affected", affect))
+	}
+
+	return nil
+}
