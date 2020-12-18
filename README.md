@@ -1,32 +1,32 @@
 # Data integration challenge
 
 ## Setup
-Follow the steps bellow to setup the project. The first step is to setup PostgreSQL. If you already have a local [PostgreSQL](https://www.postgresql.org/) instance in your computer, skip this step. 
+Follow the steps bellow to setup the project. The first step is to setup [PostgreSQL](https://www.postgresql.org/). If you already have a local PostgreSQL instance on your computer, skip this step. 
 
 ## Starting PostgreSQL service with Docker container
- We are considering that you have Docker installed in your computer. If you don't have yet, follow these steps to install [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/).
+ We are considering that you have Docker installed on your computer. If you don't have it yet, follow these steps to install [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/).
 
 After successfully installed, run the following command:
 
     docker-compose up -d --build
 
-This command will start two services: [PgAdmin](https://www.pgadmin.org/) and [PostgreSQL](https://www.postgresql.org/). PgAdmin is a powerful web UI for accessing postgres databases. PostgreSQL is the Database Management System used for this application.
+This command will start two services: [PgAdmin](https://www.pgadmin.org/) and [PostgreSQL](https://www.postgresql.org/). PgAdmin is a powerful web UI for accessing Postgres databases. PostgreSQL is the Database Management System used for this application.
 
 ### Running Application Locally
-This means that you want to run the application directly from you OS system. To do this, you must have [Golang](https://golang.org/) (version >= 1.15.6) installed in your computer.
+This means that you want to run the application directly from your OS system. To do this, you must have [Golang](https://golang.org/) (version >= 1.15.6) installed on your computer.
 
 #### Setting Database Crendetials
 You must define database credentials as environment variables. If you have a Linux-based OS, run the commands:
 
 ```bash
-export DB_HOST=`YOUR_DATABASE_HOST`
-export DB_PORT=`YOUR_DATABASE_PORT`
-export DB_NAME=`YOUR_DATABASE_NAME`
-export DB_USER=`YOUR_DATABASE_USER`
-export DB_PASS=`YOUR_DATABASE_PASSWORD`
+export DB_HOST=YOUR_DATABASE_HOST
+export DB_PORT=YOUR_DATABASE_PORT
+export DB_NAME=YOUR_DATABASE_NAME
+export DB_USER=YOUR_DATABASE_USER
+export DB_PASS=YOUR_DATABASE_PASSWORD
 ```
 
-Replace `YOUR_DATABASE_HOST` for the specific host, for example, if you are running postgres locally, it will be `localhost` and the `YOUR_DATABASE_PORT` probably will be the default `5432`. `YOUR_DATABASE_NAME` will be the database name, e.g: `yawoen` and lastly, `YOUR_DATABASE_USER` and `YOUR_DATABASE_PASSWORD` are the database credentials.
+Replace `YOUR_DATABASE_HOST` for the specific host. For example, if you are running postgres locally, it will be `localhost` and the `YOUR_DATABASE_PORT` probably will be the default `5432`. `YOUR_DATABASE_NAME` will be the database name, e.g: `yawoen` and lastly, `YOUR_DATABASE_USER` and `YOUR_DATABASE_PASSWORD` are the database credentials.
 
 #### Populating the database
 
@@ -38,23 +38,18 @@ And run with the support file provided:
 
     ./setup -f test-files/q1_catalog.csv
 
-This program will create a table `companies` in your database, then populating with the valid companies in the csv file.
+This program will create a table `companies` in your database, then populating with the valid companies in the CSV file. Feel free to choose another CSV file, with other companies if you want.
 
 #### Running the API
-Compile the api source-code:
+Compile the API source-code and run:
 
-    go build bin/api.go
-
-Run API:
-
-    ./api
+    go build bin/api.go && ./api
 
 Or using `Makefile`:
 
     make start
 
 **Note**: *you can specify the port that the API will run, by default is 8080, but you can change using the `-p` or `--port` parameter.* E.g, to run at 9000, you can just run: `./api -p 9000`. 
-
 
 ## API Endpoints
 
@@ -69,9 +64,9 @@ You can test this endpoint sending a request via [cURL](https://curl.se/):
 ### /company - Retrieve Company Data
 
 The endpoint `/company/{name}/{zip_code}` will return the company data in JSON.
-For example, send a `GET` in `http://localhost:8081/company/tim%20dieball/53115`:
 
-This request will return
+For example: send a `GET` to `http://localhost:8081/company/tim/53115` and it will return:
+
 ```json
 {
     "id": 29,
