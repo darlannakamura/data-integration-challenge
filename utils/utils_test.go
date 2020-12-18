@@ -3,7 +3,7 @@ package utils
 import "testing"
 
 func SuccessTestReadCSV(t *testing.T) {
-	var filepath = "../files/q1_catalog.csv"
+	var filepath = "../test-files/q1_catalog.csv"
 	rows, err := ReadCSV(filepath)
 	
 	if err != nil {
@@ -18,7 +18,7 @@ func SuccessTestReadCSV(t *testing.T) {
 }
 
 func TestReadCSVWhenFileIsUnknown(t *testing.T) {
-	var filepath = "../files/unknown_file.csv"
+	var filepath = "../test-files/unknown_file.csv"
 	_, err := ReadCSV(filepath)
 
 	if err != nil && err.Error() == "Couldn't open the csv file" {
@@ -29,7 +29,7 @@ func TestReadCSVWhenFileIsUnknown(t *testing.T) {
 }
 
 func TestReadCSVWithWrongSeparator(t *testing.T) {
-	var filepath = "../test_files/utils/comma-separator.csv"
+	var filepath = "../test-files/utils/comma-separator.csv"
 	_, err := ReadCSV(filepath)
 
 	if err != nil && err.Error() == "CSV file with wrong comma separator. Please, check if is ; and try again." {
@@ -138,5 +138,24 @@ func TestValidateZipWithLettersAndDigits(t *testing.T) {
 		t.Errorf("ValidateZip('%s') FAILED, got an unexpected result", input)
 	} else {
 		t.Logf("ValidateZip('%s') PASSED", input)
+	}
+}
+
+func TestValidateWebsite(t *testing.T) {
+	var functionName = "ValidateWebsite" 
+	positive := []string{"https://google.com", "http://repsources.com", "http://memorials.pro", "http://teaworldone.com"}
+
+	negative := []string{"ht://google.com", "this is not a website", "httpd://fakewebsite.org"}
+
+	for i := range positive {
+		if ValidateWebsite(positive[i]) == false {
+			t.Errorf("%s('%s') FAILED, got false to %s input", functionName, positive[i], positive[i])
+		}
+	}
+
+	for i := range negative {
+		if ValidateWebsite(negative[i]) == true {
+			t.Errorf("%s('%s') FAILED, got true to %s input", functionName, negative[i], negative[i])
+		}
 	}
 }

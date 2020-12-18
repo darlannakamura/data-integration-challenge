@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	"fmt"
+	"log"
 	"strings"
 	utils "../utils"
 	db "../db"
@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Running setup ...")
+	log.Println("Running setup ...")
 
 	parser := argparse.NewParser("parser", "")
 
@@ -19,21 +19,20 @@ func main() {
 	err := parser.Parse(os.Args)
 	
 	if err != nil {
-		fmt.Print(parser.Usage(err))
+		log.Fatal(parser.Usage(err))
 	}
 
-	fmt.Println("Reading CSV file:", *filename)
+	log.Println("Reading CSV file:", *filename)
 
 	rows, err := utils.ReadCSV(*filename)
 
 	if err != nil { 
-		fmt.Println(err)
+		log.Fatal(err)
 		return
 	}
 
-	fmt.Println("Recreating companies table ...")
+	log.Println("Creating companies table ...")
 
-	db.DropCompanyTable()
 	db.CreateCompanyTable()
 
 	for i := 0; i < len(rows); i++ {
@@ -46,5 +45,5 @@ func main() {
 		}
 	}
 
-	fmt.Println("Your database has been populated successfully.")
+	log.Println("Your database has been populated successfully.")
 }
