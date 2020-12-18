@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"log"
+	"errors"
 	"net/http"
 	"strconv"
 	"encoding/json"
@@ -17,6 +18,14 @@ const STATUS_HTTP_UNPROCESSABLE_ENTITY = 422
 
 type Response struct {
 	Message string `json:"message"`
+}
+
+func Greetings(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	res, _ := json.Marshal(Response{Message: "API is up"})
+	w.Write(res)
+
+	utils.LoggingRequest(r, http.StatusOK)
 }
 
 func handleUnprocessableEntity(w http.ResponseWriter, r *http.Request, err error) {
@@ -71,14 +80,39 @@ func UploadCsv(w http.ResponseWriter, r *http.Request) {
 	utils.LoggingRequest(r, http.StatusOK)
 }
 
-func Greetings(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	res, _ := json.Marshal(Response{Message: "API is up"})
-	w.Write(res)
+func GetCompany(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
 
-	log.Println(r.Method, r.URL, r.Proto, r.Host, http.StatusOK)
+	var name = vars["name"]
+	var zip = vars["zip"]
+
+	if (utils.ValidateName(name) && utils.ValidateZip(zip)) {
+		company, err := db.GetCompanyByNameAndZip(name, zip)
+
+		if err != nil {
+			handleUnprocessableEntity(w, r, err)
+		}
+
+		if company == nil {
+			w.WriteHeader(http.StatusNotFound)
+			res, _ := json.Marshal(Response{Message: "company not found"})
+			w.Write(res)
+
+			utils.LoggingRequest(r, http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusOK)
+			res, _ := json.Marshal(company)
+			w.Write(res)
+	
+			utils.LoggingRequest(r, http.StatusOK)			
+		}
+
+	} else {
+		handleUnprocessableEntity(w, r, errors.New("Wrong parameters. Name must be lower than 256 characters and zip code must have 5 digits"))
+	}
+
 }
-
+ 
 func main() {
 	parser := argparse.NewParser("parser", "")
 
@@ -94,8 +128,9 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.Path("/upload").Methods("POST").HandlerFunc(UploadCsv)
 	router.Path("/").HandlerFunc(Greetings)
+	router.Path("/upload").Methods("POST").HandlerFunc(UploadCsv)
+	router.Path("/company/{name}/{zip:[0-9]+}").HandlerFunc(GetCompany)
 
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(*port), router))
 }

@@ -17,6 +17,13 @@ type DBCredentials struct {
 	Password string
 }
 
+type Company struct {
+	Id int `json:"id"`
+	Name string `json:"name"`
+	Zip string `json:"zip"`
+	Website string `json:"website"`
+}
+
 type DBConnectionError struct{
 	message string
 }
@@ -240,4 +247,39 @@ func UpdateCompanyWebsite(id int, website string) error {
 	}
 
 	return nil
+}
+
+func GetCompanyByNameAndZip(name string, zip string) (*Company, error) {
+	db, err := GetDBConnection()
+
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := db.Query("SELECT id, name, COALESCE(website,'') FROM companies WHERE LOWER(name) LIKE '%' || $1 || '%' AND zip = $2 LIMIT 1", name, zip)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var id int
+	var fullname string
+	var website string
+
+	for rows.Next() {
+		err := rows.Scan(&id, &fullname, &website)
+		if err != nil {
+			return nil, err
+		} else {
+			return &Company{
+				Id: id,
+				Name: fullname,
+				Zip: zip,
+				Website: website}, nil
+		}
+	}
+	
+	return nil, nil
 }

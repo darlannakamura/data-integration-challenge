@@ -89,3 +89,45 @@ func TestUpdateCompany(t *testing.T) {
 		t.Errorf("%s('%s','%s') FAILED, got an unexpected error: %s", "DeleteCompany", name, zip, delError)
 	}
 }
+
+func TestGetCompanyByNameAndZip(t *testing.T) {
+	var name = "super random company"
+	var zip = "00001"
+
+	insertErr := InsertCompany(name, zip)
+
+	if insertErr != nil {
+		t.Errorf("%s('%s','%s') FAILED, got an unexpected error: %s", "InsertCompany", name, zip, insertErr)
+	}
+
+	company, err := GetCompanyByNameAndZip(name, zip)
+
+	if err != nil {
+		t.Errorf("%s('%s','%s') FAILED, got an unexpected error: %s", "GetCompanyByNameAndZip", name, zip, err)
+	}
+
+	if company == nil {
+		t.Errorf("%s('%s','%s') FAILED, got nil when getting existent company", "GetCompanyByNameAndZip", name, zip)
+	}
+
+	delErr := DeleteCompany(name, zip)
+
+	if delErr != nil {
+		t.Errorf("%s('%s','%s') FAILED, got an unexpected error: %s", "DeleteCompany", name, zip, delErr)
+	}
+}
+
+func TestGetInexistentCompanyByNameAndZip(t *testing.T) {
+	var name = "inexistentcompany"
+	var zip = "00009"
+
+	company, err := GetCompanyByNameAndZip(name, zip)
+
+	if err != nil {
+		t.Errorf("%s('%s','%s') FAILED, got an unexpected error: %s", "GetCompanyByNameAndZip", name, zip, err)
+	}
+
+	if company != nil {
+		t.Errorf("%s('%s','%s') FAILED, got a company when getting an inexistent company", "GetCompanyByNameAndZip", name, zip)
+	}
+}
