@@ -9,9 +9,9 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/akamensky/argparse"
-	utils "../utils"
-	db "../db"
-	files "../files"
+	utils "../pkgs/utils"
+	db "../pkgs/db"
+	files "../pkgs/files"
 )
 
 const STATUS_HTTP_UNPROCESSABLE_ENTITY = 422

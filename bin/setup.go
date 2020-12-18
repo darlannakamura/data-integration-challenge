@@ -4,8 +4,8 @@ import (
 	"os"
 	"log"
 	"strings"
-	utils "../utils"
-	db "../db"
+	utils "../pkgs/utils"
+	db "../pkgs/db"
 	"github.com/akamensky/argparse"
 )
 

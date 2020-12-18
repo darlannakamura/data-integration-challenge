@@ -3,7 +3,7 @@ package utils
 import "testing"
 
 func SuccessTestReadCSV(t *testing.T) {
-	var filepath = "../test-files/q1_catalog.csv"
+	var filepath = "../../test-files/q1_catalog.csv"
 	rows, err := ReadCSV(filepath)
 	
 	if err != nil {
@@ -18,7 +18,7 @@ func SuccessTestReadCSV(t *testing.T) {
 }
 
 func TestReadCSVWhenFileIsUnknown(t *testing.T) {
-	var filepath = "../test-files/unknown_file.csv"
+	var filepath = "../../test-files/unknown_file.csv"
 	_, err := ReadCSV(filepath)
 
 	if err != nil && err.Error() == "Couldn't open the csv file" {
@@ -29,7 +29,7 @@ func TestReadCSVWhenFileIsUnknown(t *testing.T) {
 }
 
 func TestReadCSVWithWrongSeparator(t *testing.T) {
-	var filepath = "../test-files/utils/comma-separator.csv"
+	var filepath = "../../test-files/utils/comma-separator.csv"
 	_, err := ReadCSV(filepath)
 
 	if err != nil && err.Error() == "CSV file with wrong comma separator. Please, check if is ; and try again." {
