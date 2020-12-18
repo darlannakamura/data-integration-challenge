@@ -1,86 +1,104 @@
 # Data integration challenge
 
+## Setup
+Follow the steps bellow to setup the project. The first step is to setup PostgreSQL. If you already have a local [PostgreSQL](https://www.postgresql.org/) instance in your computer, skip this step. 
 
-Welcome to Data Integration challenge.
+## Starting PostgreSQL service with Docker container
+ We are considering that you have Docker installed in your computer. If you don't have yet, follow these steps to install [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/).
 
-Yawoen company has hired you to implement a Data API for Data Integration team.
+After successfully installed, run the following command:
 
-Data Integration team is focused on combining data from different heterogeneous sources and providing it to an unified view into entities.
+    docker-compose up -d --build
 
-## The challenge
+This command will start two services: [PgAdmin](https://www.pgadmin.org/) and [PostgreSQL](https://www.postgresql.org/). PgAdmin is a powerful web UI for accessing postgres databases. PostgreSQL is the Database Management System used for this application.
 
-It would be really good if you try to make the code using Go language :)
-The other technologies you can feel free to choose.
+### Running Application Locally
+This means that you want to run the application directly from you OS system. To do this, you must have [Golang](https://golang.org/) (version >= 1.15.6) installed in your computer.
 
-### 1 - Load treated company data in a database
+#### Setting Database Crendetials
+You must define database credentials as environment variables. If you have a Linux-based OS, run the commands:
 
-Read data from CSV file and load into the database to create an entity named **companies**.
+```bash
+export DB_HOST=`YOUR_DATABASE_HOST`
+export DB_PORT=`YOUR_DATABASE_PORT`
+export DB_NAME=`YOUR_DATABASE_NAME`
+export DB_USER=`YOUR_DATABASE_USER`
+export DB_PASS=`YOUR_DATABASE_PASSWORD`
+```
 
-This entity should contain the following fields: id, company name and zip code. 
+Replace `YOUR_DATABASE_HOST` for the specific host, for example, if you are running postgres locally, it will be `localhost` and the `YOUR_DATABASE_PORT` probably will be the default `5432`. `YOUR_DATABASE_NAME` will be the database name, e.g: `yawoen` and lastly, `YOUR_DATABASE_USER` and `YOUR_DATABASE_PASSWORD` are the database credentials.
 
-- The loaded data should have the following treatment:
-    - **Name:** upper case text
-    - **zip:** a five digit text
+#### Populating the database
 
-support file: q1_catalog.csv
+Now all the settings are done, and we can populate the database. We can compile our setup source-code running:
 
+    go build bin/setup.go
 
-### 2 - An API to integrate data using a database
+And run with the support file provided:
 
-Yawoen now wants to get website data from another source and integrate it with the entity you've just created on the database. When the requirements are met, it's **mandatory** that the **data are merged**.
+    ./setup -f test-files/q1_catalog.csv
 
-This new source data must meet the following requirements:
+This program will create a table `companies` in your database, then populating with the valid companies in the csv file.
 
-- Input file format: CSV
-- Data treatment
-    - **Name:** upper case text
-    - **zip:** a five digit text
-    - **website:** lower case text
-- Parameters
-    - Name: string
-    - Zip: string 
-    - Website: string
+#### Running the API
+Compile the api source-code:
 
-Build an API to **integrate** `website` data field into the entity records you've just created using **HTTP protocol**.
+    go build bin/api.go
 
-The `id` field is non existent on the data source, so you'll have to use the available fields to aggregate the new attribute **website** and store it. If the record doesn't exist, discard it.
+Run API:
 
-support file: q2_clientData.csv
+    ./api
 
+Or using `Makefile`:
 
-### Extra - Matching API to retrieve data
+    make start
 
-Now Yawoen wants to create an API to provide information getting companies information from the entity to a client. 
-The parameters would be `name` and `zip` fields. To query on the database an **AND** logic operator must be used between the fields.
-
-You will need to have a matching strategy because the client might only have a part of the company name. 
-Example: "Yawoen" string from "Yawoen Business Solutions".
-
-Output example: 
- ```
- {
- 	"id": "abc-1de-123fg",
- 	"name": "Yawoen Business Solutions",
- 	"zip":"10023",
- 	"website": "www.yawoen.com"
- }
- ```
-
-## Notes
+**Note**: *you can specify the port that the API will run, by default is 8080, but you can change using the `-p` or `--port` parameter.* E.g, to run at 9000, you can just run: `./api -p 9000`. 
 
 
-- Make sure other developers can easily run the application locally.
-- Yawoen isn't picky about the programming language, the database and other tools that you might choose. Just take notice of the market before making your decision.
-- Automated tests are mandatory.
-- Document your API: fill out a **README.md** file with instructions on how to install and use it.
+## API Endpoints
 
+### /upload - Upload CSV file
 
-## Deliverable
+The endpoint `/upload` will receive a CSV file, updating the company website when the company already exists in the database.
 
+You can test this endpoint sending a request via [cURL](https://curl.se/):
 
-- :heavy_check_mark: It would be REALLY nice if it was hosted in a git repo of your **own**. You can create a new empty project, create a branch and Pull Request it to the new master branch you have just created. Provide the PR URL for us so we can discuss the code :grin:. BUT if you'd rather, just compress this directory and send it back to us.
-- :heavy_check_mark: Make sure Yawoen folks will have access to the source code.
-- :heavy_check_mark: Fill the **Makefile** targets with the apropriated commands (**TODO** tags). That is for easy executing the deliverables (tests and execution). If you have other ideas besides a Makefile feel free to use and reference it on your documentation.
-- :x: **Do not** start a Pull Request to this project.
+    curl http://localhost:8080/upload -F "fileupload=@test-files/q2_clientData.csv" -vvv
 
-Have fun!
+### /company - Retrieve Company Data
+
+The endpoint `/company/{name}/{zip_code}` will return the company data in JSON.
+For example, send a `GET` in `http://localhost:8081/company/tim%20dieball/53115`:
+
+This request will return
+```json
+{
+    "id": 29,
+    "name": "TIM DIEBALL",
+    "zip": "53115",
+    "website": "http://motorsport-coatings.com"
+}
+```
+
+## Directory Structure
+
+```bash
+data-integration-challenge/
+├── bin/ # executable files
+│   ├── setup # setup file to populate database
+│   ├── api # starts the API server
+│
+├── pkgs/ # packages
+│   ├── db # database connection package
+│   ├── files # package for handling files
+│   ├── utils # package for validation and logging
+│
+├── test-files/ # required files to run tests
+```
+
+## Testing
+
+Run the tests using `Makefile`:
+
+    make check
