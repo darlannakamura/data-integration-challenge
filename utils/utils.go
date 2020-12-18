@@ -4,14 +4,18 @@ import (
 	"encoding/csv"
 	"io"
 	"os"
+	"log"
 	"regexp"
 	"math/rand"
+	"net/http"
 	"time"
+	valid "github.com/asaskevich/govalidator"
 )
 
 type CSVRow struct {
 	Name string
 	Zip string
+	Website string
 }
 
 type ReadCSVError struct{
@@ -51,12 +55,16 @@ func ReadCSV(filename string) ([]CSVRow, error) {
 			return rows, NewReadCSVError("Couldn't read csv file")
 		}
 
-		if len(row) != 2 {
+		if len(row) < 2 || len(row) > 3 {
 			return rows, NewReadCSVError("CSV file with wrong comma separator. Please, check if is ; and try again.")
 		}
 
 		if rowIndex != 0 {
-			rows = append(rows, CSVRow{Name: row[0], Zip: row[1]})
+			if len(row) == 2 {
+				rows = append(rows, CSVRow{Name: row[0], Zip: row[1]})
+			} else {
+				rows = append(rows, CSVRow{Name: row[0], Zip: row[1], Website: row[2]})
+			}
 		}
 
 		rowIndex++
@@ -86,6 +94,14 @@ func ValidateZip(zip string) bool {
 	return false
 }
 
+func ValidateWebsite(website string) bool {
+	return valid.IsURL(website)
+}
+
+func ValidateFields(name string, zip string, website string) bool {
+	return ValidateName(name) && ValidateZip(zip) && ValidateWebsite(website)
+}
+
 func StringWithCharset(length int, charset string) string {
 	var seededRand *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
@@ -102,4 +118,8 @@ func GenerateRandomString(length int) string {
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 	return StringWithCharset(length, charset)
+}
+
+func LoggingRequest(r *http.Request, httpStatus int) {
+	log.Println(r.Method, r.URL, r.Proto, r.Host, httpStatus)
 }
