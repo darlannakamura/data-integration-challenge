@@ -1,10 +1,9 @@
-#Challenge Makefile
-
+setup:
+	go build bin/setup.go
+	./setup -f test-files/q1_catalog.csv
 start:
-#TODO: commands necessary to start the API
-
+	go build bin/api.go
+	./api
 check:
-#TODO: include command to test the code and show the results
-
-#setup:
-#if needed to setup the enviroment before starting it
+	go test ./pkgs/utils
+	go test ./pkgs/db
